@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小蓝的酒单</title>
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      font-family: 'ZCOOL KuaiLe', 'Ma Shan Zheng', cursive;
+      background: linear-gradient(170deg, #f7ead8 0%, #f0dcc4 30%, #ecdac6 60%, #e8ceaf 100%);
+      color: #5a3e2b;
+      min-height: 100vh;
+      overflow-x: hidden
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 25% 75%, rgba(222, 168, 130, .18) 0%, transparent 55%),
+        radial-gradient(ellipse at 75% 25%, rgba(240, 200, 160, .12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 100%, rgba(210, 155, 110, .1) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0
+    }
+
+    /* ─── Title ─── */
+    .page-title {
+      text-align: center;
+      padding: 40px 20px 10px;
+      position: relative;
+      z-index: 1
+    }
+
+    .page-title h1 {
+      font-family: 'Ma Shan Zheng', cursive;
+      font-size: 52px;
+      color: #c4735a;
+      letter-spacing: 4px;
+      animation: titleIn .6s ease-out
+    }
+
+    .page-title h1 .accent {
+      font-size: 62px;
+      color: #d4634a
+    }
+
+    .page-title .sub {
+      font-size: 14px;
+      color: #b08970;
+      margin-top: 6px;
+      letter-spacing: 2px
+    }
+
+    @keyframes titleIn {
+      0% {
+        transform: scale(.6) rotate(-3deg);
+        opacity: 0
+      }
+
+      100% {
+        transform: scale(1) rotate(0);
+        opacity: 1
+      }
+    }
+
+    /* ─── Menu Container (two-column like original image) ─── */
+    .menu {
+      max-width: 820px;
+      margin: 20px auto 0;
+      padding: 0 16px 40px;
+      display: flex;
+      gap: 20px;
+      position: relative;
+      z-index: 1
+    }
+
+    .col-left,
+    .col-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .col-right {
+      padding-top: 50px
+    }
+
+    /* ─── Individual Drink Item ─── */
+    .drink {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all .3s;
+      position: relative
+    }
+
+    /* Subtle organic offsets within each column */
+    .col-left .drink:nth-child(1) {
+      transform: translateX(2px)
+    }
+
+    .col-left .drink:nth-child(2) {
+      transform: translateX(-4px)
+    }
+
+    .col-left .drink:nth-child(3) {
+      transform: translateX(6px)
+    }
+
+    .col-left .drink:nth-child(4) {
+      transform: translateX(-2px)
+    }
+
+    .col-left .drink:nth-child(5) {
+      transform: translateX(4px)
+    }
+
+    .col-right .drink:nth-child(1) {
+      transform: translateX(-3px)
+    }
+
+    .col-right .drink:nth-child(2) {
+      transform: translateX(5px)
+    }
+
+    .col-right .drink:nth-child(3) {
+      transform: translateX(-6px)
+    }
+
+    .col-right .drink:nth-child(4) {
+      transform: translateX(3px)
+    }
+
+    .col-right .drink:nth-child(5) {
+      transform: translateX(-4px)
+    }
+
+    .col-right .drink:nth-child(6) {
+      transform: translateX(2px)
+    }
+
+    .drink:hover {
+      background: rgba(232, 178, 152, .1);
+      transform: translateX(3px) !important
+    }
+
+    .drink:hover .drink-glass {
+      transform: rotate(-5deg) scale(1.08)
+    }
+
+    /* ─── Uploaded Image ─── */
+    .drink-img {
+      width: 60px;
+      height: 72px;
+      object-fit: contain;
+      flex-shrink: 0;
+      transition: transform .4s cubic-bezier(.4, 0, .2, 1);
+      mix-blend-mode: multiply;
+      filter: none
+    }
+
+    .drink:hover .drink-img {
+      transform: rotate(-5deg) scale(1.08)
+    }
+
+    /* ─── CSS Drink Glass Illustrations (fallback) ─── */
+    .drink-glass {
+      width: 56px;
+      height: 72px;
+      position: relative;
+      flex-shrink: 0;
+      transition: transform .4s cubic-bezier(.4, 0, .2, 1);
+      filter: drop-shadow(1px 2px 3px rgba(196, 115, 90, .15))
+    }
+
+    /* Glass base shapes */
+    .glass-body {
+      position: absolute;
+      border-radius: 4px 4px 6px 6px;
+      overflow: hidden;
+      opacity: .85
+    }
+
+    .glass-body::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 8px;
+      height: 60%;
+      background: rgba(255, 255, 255, .35);
+      border-radius: 50%;
+      transform: rotate(-10deg)
+    }
+
+    /* Tall glass */
+    .tall .glass-body {
+      width: 28px;
+      height: 54px;
+      bottom: 2px;
+      left: 14px
+    }
+
+    .tall .glass-stem {
+      display: none
+    }
+
+    /* Wine/stemmed glass */
+    .stemmed .glass-body {
+      width: 34px;
+      height: 38px;
+      top: 4px;
+      left: 11px;
+      border-radius: 50% 50% 8px 8px
+    }
+
+    .stemmed .glass-stem {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 3px;
+      height: 16px;
+      background: #d4c4b0;
+      transform: translateX(-50%);
+      border-radius: 1px
+    }
+
+    .stemmed .glass-stem::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 18px;
+      height: 3px;
+      background: #d4c4b0;
+      transform: translateX(-50%);
+      border-radius: 2px
+    }
+
+    /* Short/rocks glass */
+    .short .glass-body {
+      width: 34px;
+      height: 40px;
+      bottom: 2px;
+      left: 11px;
+      border-radius: 2px 2px 4px 4px
+    }
+
+    .short .glass-stem {
+      display: none
+    }
+
+    /* Garnishes */
+    .garnish {
+      position: absolute;
+      z-index: 2
+    }
+
+    .garnish-strawberry {
+      top: 0;
+      right: 6px;
+      font-size: 16px
+    }
+
+    .garnish-lemon {
+      top: 2px;
+      right: 4px;
+      width: 14px;
+      height: 14px;
+      background: #f0d040;
+      border-radius: 50%;
+      border: 1.5px solid #e0b830;
+      box-shadow: inset -2px -1px 0 rgba(0, 0, 0, .08)
+    }
+
+    .garnish-lime {
+      top: 8px;
+      right: 2px;
+      width: 12px;
+      height: 12px;
+      background: #88c040;
+      border-radius: 50%;
+      border: 1.5px solid #70a830
+    }
+
+    .garnish-mint {
+      top: -2px;
+      left: 20px;
+      font-size: 13px
+    }
+
+    .garnish-umbrella {
+      top: -4px;
+      right: 8px;
+      font-size: 14px
+    }
+
+    .garnish-salt {
+      position: absolute;
+      top: 0;
+      left: 11px;
+      right: 11px;
+      height: 3px;
+      background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .9) 0px, rgba(255, 255, 255, .9) 2px, transparent 2px, transparent 4px);
+      border-radius: 1px
+    }
+
+    .garnish-ice {
+      position: absolute;
+      top: 12px;
+      left: 18px;
+      width: 10px;
+      height: 8px;
+      background: rgba(200, 230, 255, .5);
+      border-radius: 2px;
+      border: 1px solid rgba(180, 210, 240, .4)
+    }
+
+    /* Drink colors */
+    .color-strawberry {
+      background: linear-gradient(180deg, #f0a0b0 0%, #e88098 60%, #d06878 100%)
+    }
+
+    .color-sunset {
+      background: linear-gradient(180deg, #f0c040 0%, #e89840 40%, #d06840 100%)
+    }
+
+    .color-lemon-tea {
+      background: linear-gradient(180deg, #e0c070 0%, #c89848 100%)
+    }
+
+    .color-screwdriver {
+      background: linear-gradient(180deg, #f0b840 0%, #e89030 100%)
+    }
+
+    .color-cola {
+      background: linear-gradient(180deg, #5a3020 0%, #3a1810 100%)
+    }
+
+    .color-california {
+      background: linear-gradient(180deg, #f0b840 0%, #e88830 80%)
+    }
+
+    .color-coconut {
+      background: linear-gradient(180deg, #f8f0e0 0%, #e8dcc8 100%)
+    }
+
+    .color-sunset-ride {
+      background: linear-gradient(180deg, #e8a040 0%, #d07030 100%)
+    }
+
+    .color-salty-dog {
+      background: linear-gradient(180deg, #f0d088 0%, #e0b868 100%)
+    }
+
+    .color-miss-you {
+      background: linear-gradient(180deg, #d8a8d0 0%, #c088b8 60%, #a870a0 100%)
+    }
+
+    .color-pina {
+      background: linear-gradient(180deg, #f0e8a0 0%, #e0d070 50%, #c8b848 100%)
+    }
+
+    .color-mystery {
+      background: linear-gradient(180deg, #88b8e8 0%, #6090d0 50%, #4870b0 100%)
+    }
+
+    /* ─── Drink Info ─── */
+    .drink-info {
+      flex: 1;
+      min-width: 0
+    }
+
+    .drink-name {
+      font-family: 'Ma Shan Zheng', cursive;
+      font-size: 22px;
+      color: #5a3e2b;
+      line-height: 1.2
+    }
+
+    .drink-stars {
+      color: #d4634a;
+      font-size: 12px;
+      letter-spacing: 1px;
+      margin-top: 1px
+    }
+
+    .drink-recipe {
+      font-size: 12px;
+      color: #b08970;
+      margin-top: 4px;
+      line-height: 1.5
+    }
+
+    .drink-unavailable {
+      position: relative;
+      opacity: .5
+    }
+
+    .drink-unavailable::after {
+      content: '✕';
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 20px;
+      color: #c4735a;
+      font-weight: bold
+    }
+
+    /* ─── Expanded Detail (click to reveal) ─── */
+    .drink-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .4s ease, opacity .3s;
+      opacity: 0;
+      font-size: 12px;
+      color: #8a6a55;
+      line-height: 1.6
+    }
+
+    .drink.expanded .drink-detail {
+      max-height: 120px;
+      opacity: 1;
+      margin-top: 6px
+    }
+
+    .detail-tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(212, 99, 74, .1);
+      color: #d4634a;
+      margin-right: 4px;
+      margin-top: 3px
+    }
+
+    /* ─── Mystery Card ─── */
+    .drink.mystery {
+      border: 1.5px dashed rgba(196, 115, 90, .35);
+      border-radius: 14px;
+      background: rgba(255, 248, 240, .6)
+    }
+
+    .mystery-qmark {
+      font-family: 'Ma Shan Zheng', cursive;
+      font-size: 42px;
+      color: #d4634a;
+      width: 56px;
+      text-align: center;
+      flex-shrink: 0;
+      animation: qPulse 2s ease-in-out infinite
+    }
+
+    @keyframes qPulse {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      50% {
+        transform: scale(1.12) rotate(5deg)
+      }
+    }
+
+    /* ─── Blind Box Overlay ─── */
+    .blindbox-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(40, 20, 10, .6);
+      backdrop-filter: blur(8px)
+    }
+
+    .blindbox-overlay.active {
+      display: flex
+    }
+
+    .blindbox-card {
+      width: 280px;
+      padding: 36px 28px;
+      background: #fdf6ee;
+      border-radius: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden
+    }
+
+    .blindbox-card.shaking {
+      animation: boxShake .5s ease-in-out 3
+    }
+
+    .blindbox-card.revealing {
+      animation: boxReveal .6s ease-out forwards
+    }
+
+    @keyframes boxShake {
+
+      0%,
+      100% {
+        transform: translateX(0) rotate(0)
+      }
+
+      20% {
+        transform: translateX(-12px) rotate(-4deg)
+      }
+
+      40% {
+        transform: translateX(10px) rotate(3deg)
+      }
+
+      60% {
+        transform: translateX(-8px) rotate(-2deg)
+      }
+
+      80% {
+        transform: translateX(6px) rotate(1deg)
+      }
+    }
+
+    @keyframes boxReveal {
+      0% {
+        transform: scale(1)
+      }
+
+      40% {
+        transform: scale(1.15)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    .blindbox-title {
+      font-family: 'Ma Shan Zheng', cursive;
+      font-size: 28px;
+      color: #c4735a;
+      margin-bottom: 8px
+    }
+
+    .blindbox-emoji {
+      font-size: 64px;
+      margin: 16px 0;
+      transition: transform .3s
+    }
+
+    .blindbox-desc {
+      font-size: 14px;
+      color: #8a6a55;
+      line-height: 1.6;
+      margin-top: 8px
+    }
+
+    .blindbox-close {
+      margin-top: 20px;
+      padding: 8px 28px;
+      border: 1.5px solid rgba(196, 115, 90, .3);
+      border-radius: 20px;
+      background: transparent;
+      color: #c4735a;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .blindbox-close:hover {
+      background: rgba(196, 115, 90, .1)
+    }
+
+    /* Confetti */
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: confettiFall 1.5s ease-out forwards
+    }
+
+    @keyframes confettiFall {
+      0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0) scale(1)
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(120px) rotate(720deg) scale(0)
+      }
+    }
+
+    /* ─── Footer ─── */
+    .footer {
+      text-align: center;
+      padding: 20px 20px 40px;
+      color: #c4a88a;
+      font-size: 12px;
+      position: relative;
+      z-index: 1
+    }
+
+    .footer .heart {
+      color: #d4634a;
+      display: inline-block;
+      animation: heartbeat 1.5s ease-in-out infinite
+    }
+
+    @keyframes heartbeat {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      15% {
+        transform: scale(1.2)
+      }
+
+      30% {
+        transform: scale(1)
+      }
+
+      45% {
+        transform: scale(1.1)
+      }
+    }
+
+    /* ─── Bubble on click ─── */
+    .bubble {
+      position: fixed;
+      pointer-events: none;
+      z-index: 100;
+      font-size: 22px;
+      animation: bubbleUp 1s ease-out forwards
+    }
+
+    @keyframes bubbleUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-70px) scale(1.3)
+      }
+    }
+
+    /* ─── Responsive ─── */
+    @media(max-width:600px) {
+      .menu {
+        flex-direction: column
+      }
+
+      .col-right {
+        padding-top: 0
+      }
+
+      .page-title h1 {
+        font-size: 38px
+      }
+
+      .page-title h1 .accent {
+        font-size: 46px
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page-title">
+    <h1>小蓝的<span class="accent">酒单</span></h1>
+    <div class="sub">🍹 点击查看详情 · 小蓝特调有惊喜 🍹</div>
+  </div>
+
+  <div class="menu" id="menu">
+    <div class="col-left" id="col-left"></div>
+    <div class="col-right" id="col-right"></div>
+  </div>
+
+  <!-- Mystery Drink (full-width, bottom) -->
+  <div id="mystery-section" style="max-width:820px;margin:10px auto 0;padding:0 16px;position:relative;z-index:1"></div>
+
+  <!-- Blind Box Overlay -->
+  <div class="blindbox-overlay" id="blindbox">
+    <div class="blindbox-card" id="blindbox-card">
+      <div class="blindbox-title" id="bb-title">开盲盒中...</div>
+      <div class="blindbox-emoji" id="bb-emoji">🎁</div>
+      <div class="blindbox-desc" id="bb-desc">摇一摇，看看今天小蓝给你调了什么</div>
+      <button class="blindbox-close" id="bb-close" style="display:none">再来一杯 🍹</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    用 <span class="heart">♥</span> 调制 · 小蓝的深夜酒吧 · 请适量饮用 🌙
+  </div>
+
+  <script>
+    /* ─── Drink Data (matching original image layout: left col then right col) ─── */
+    const LEFT = [
+      {
+        name: "草莓乳酸菌", imgId: "caomei", glass: "stemmed", color: "color-strawberry", garnish: "strawberry",
+        recipe: "伏特加 + 草莓汁 + 养乐多", detail: "甜甜的少女风，草莓遇上养乐多的酸甜碰撞，入口丝滑", tags: ["甜口", "少女系", "入门款"], emoji: "🍓"
+      },
+      {
+        name: "绝对日落", imgId: "riluo", glass: "tall", color: "color-sunset", garnish: "none",
+        recipe: "伏特加 + 橙汁 + 葡萄汽泡水", detail: "夕阳般的渐变色泽，橙汁清甜加上气泡跳跃感", tags: ["清爽", "颜值高"], emoji: "🌅"
+      },
+      {
+        name: "柠檬红茶", imgId: "ningmeng", glass: "tall", color: "color-lemon-tea", garnish: "lemon",
+        recipe: "伏特加 + 柠檬茶 + 柠檬", detail: "下午茶经典搭配，柠檬的酸与红茶的甘完美融合", tags: ["茶味", "百搭"], emoji: "🍋"
+      },
+      {
+        name: "螺丝起子", imgId: "luosi", glass: "tall", color: "color-screwdriver", garnish: "mint",
+        recipe: "伏特加 + 橙汁 + 薄荷叶", detail: "鸡尾酒入门必喝款，薄荷叶带来清新点缀", tags: ["经典", "入门"], emoji: "🍊"
+      },
+      {
+        name: "自由古巴", imgId: "guba", glass: "tall", color: "color-cola", garnish: "lime",
+        recipe: "白朗姆 + 可乐 + 柠檬汁", detail: "朗姆酒的甘蔗甜与可乐碰撞，柠檬汁提亮", tags: ["经典", "派对"], emoji: "🇨🇺"
+      },
+      {
+        name: "椰林飘香", imgId: "yelin", glass: "short", color: "color-pina", garnish: "umbrella",
+        recipe: "白朗姆 + 椰子酒 + 菠萝汁 + 椰奶 + 椰果", detail: "一杯感受海岛度假，浓郁椰子风味搭配热带菠萝", tags: ["热带", "度假风"], emoji: "🏝️"
+      }
+    ];
+
+    const MYSTERY = { name: "小蓝特调", imgId: "xiaolan", mystery: true, recipe: "??????", emoji: "❓" };
+
+    const RIGHT = [
+      {
+        name: "加州之恋", imgId: "jiazhou", glass: "short", color: "color-california", garnish: "none",
+        recipe: "白朗姆 + 橙汁 + 葡萄汽水", detail: "阳光加州的味道，橙汁热情与汽水活力完美组合", tags: ["阳光", "轻快"], emoji: "☀️"
+      },
+      {
+        name: "椰汁白朗姆", imgId: "yezhi", glass: "short", color: "color-coconut", garnish: "lemon",
+        recipe: "白朗姆 + 椰汁 + 柠檬", detail: "椰汁的清甜与朗姆酒的甘香完美融合", tags: ["热带"], emoji: "🥥"
+      },
+      {
+        name: "落日飞车", imgId: "luori", glass: "short", color: "color-sunset-ride", garnish: "ice", stars: 3,
+        recipe: "白朗姆 + 橙汁 + 葡萄汽水", detail: "乐队同名酒，橙红落日公路感，适合放着chill music慢品", tags: ["Chill", "文艺"], emoji: "🚗"
+      },
+      {
+        name: "咸狗", imgId: "xiangou", glass: "short", color: "color-salty-dog", garnish: "salt", stars: 2,
+        recipe: "伏特加 + 水蜜C + 盐边", detail: "杯口盐边是灵魂！咸甜交织的微醺之夜", tags: ["咸甜", "特别"], emoji: "🐕"
+      },
+      {
+        name: "想见你", imgId: "xiangjian", glass: "stemmed", color: "color-miss-you", garnish: "none", stars: 3,
+        recipe: "伏特加 + 水蜜C + 葡萄汽泡水", detail: "淡紫色浪漫，气泡升起时仿佛心动的感觉", tags: ["浪漫", "推荐"], emoji: "💌"
+      }
+    ];
+
+    /* ─── Render Drink Image (try user-uploaded first, CSS fallback) ─── */
+    function renderGlass(d) {
+      if (d.mystery) return `<div class="mystery-qmark">？</div>`;
+      // Try user-uploaded image from img/ folder
+      const fallbackCSS = buildCSSGlass(d);
+      if (d.imgId) {
+        return `<img class="drink-img" src="img/${d.imgId}.png"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+          alt="${d.name}"><div style="display:none">${fallbackCSS}</div>`;
+      }
+      return fallbackCSS;
+    }
+
+    function buildCSSGlass(d) {
+      let garnishHTML = '';
+      if (d.garnish === 'strawberry') garnishHTML = '<div class="garnish garnish-strawberry">🍓</div>';
+      else if (d.garnish === 'lemon') garnishHTML = '<div class="garnish garnish-lemon"></div>';
+      else if (d.garnish === 'lime') garnishHTML = '<div class="garnish garnish-lime"></div>';
+      else if (d.garnish === 'mint') garnishHTML = '<div class="garnish garnish-mint">🌿</div>';
+      else if (d.garnish === 'umbrella') garnishHTML = '<div class="garnish garnish-umbrella">☂️</div>';
+      else if (d.garnish === 'salt') garnishHTML = '<div class="garnish-salt"></div>';
+      else if (d.garnish === 'ice') garnishHTML = '<div class="garnish-ice"></div>';
+      return `<div class="drink-glass ${d.glass}">${garnishHTML}<div class="glass-body ${d.color}"></div>${d.glass === 'stemmed' ? '<div class="glass-stem"></div>' : ''}</div>`;
+    }
+
+    /* ─── Render One Drink ─── */
+    function renderDrink(d, idx) {
+      const cls = ['drink'];
+      if (d.mystery) cls.push('mystery');
+      if (d.unavailable) cls.push('drink-unavailable');
+      const starsHTML = d.stars ? `<div class="drink-stars">${'★'.repeat(d.stars)}${'☆'.repeat(3 - d.stars)}</div>` : '';
+      const detailHTML = d.detail ? `<div class="drink-detail"><p>${d.detail}</p><div>${(d.tags || []).map(t => `<span class="detail-tag">${t}</span>`).join('')}</div></div>` : '';
+      return `<div class="${cls.join(' ')}" data-idx="${idx}" data-mystery="${d.mystery || false}" style="animation:cardFadeIn .4s ${idx * 0.06}s ease-out both">${renderGlass(d)}<div class="drink-info"><div class="drink-name">${d.name}</div>${starsHTML}<div class="drink-recipe">${d.recipe}</div>${detailHTML}</div></div>`;
+    }
+
+    /* ─── Build Menu (separate columns like original) ─── */
+    const menu = document.getElementById('menu');
+    const colLeft = document.getElementById('col-left');
+    const colRight = document.getElementById('col-right');
+
+    let leftHTML = '';
+    LEFT.forEach((d, i) => { leftHTML += renderDrink(d, i); });
+    colLeft.innerHTML = leftHTML;
+
+    let rightHTML = '';
+    RIGHT.forEach((d, i) => { rightHTML += renderDrink(d, i + LEFT.length); });
+    colRight.innerHTML = rightHTML;
+
+    /* ─── Mystery drink (full-width bottom section) ─── */
+    const mysterySection = document.getElementById('mystery-section');
+    mysterySection.innerHTML = renderDrink(MYSTERY, LEFT.length + RIGHT.length);
+
+    /* Add fadeIn keyframe dynamically */
+    const style = document.createElement('style');
+    style.textContent = '@keyframes cardFadeIn{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}';
+    document.head.appendChild(style);
+
+    /* ─── Click Handlers (menu + mystery section) ─── */
+    function handleDrinkClick(e) {
+      const card = e.target.closest('.drink');
+      if (!card) return;
+      if (card.classList.contains('drink-unavailable')) return;
+
+      // Mystery = blind box
+      if (card.dataset.mystery === 'true') {
+        openBlindBox(e);
+        return;
+      }
+
+      // Toggle expand
+      const wasExpanded = card.classList.contains('expanded');
+      document.querySelectorAll('.drink.expanded').forEach(c => c.classList.remove('expanded'));
+      if (!wasExpanded) card.classList.add('expanded');
+
+      // Spawn emoji bubble
+      const d = [...LEFT, ...RIGHT].find(d => card.querySelector('.drink-name')?.textContent === d.name);
+      if (d) spawnBubble(e.clientX, e.clientY, d.emoji);
+    }
+    menu.addEventListener('click', handleDrinkClick);
+    mysterySection.addEventListener('click', handleDrinkClick);
+
+    function spawnBubble(x, y, emoji) {
+      const el = document.createElement('div');
+      el.className = 'bubble';
+      el.textContent = emoji;
+      el.style.left = (x - 11) + 'px';
+      el.style.top = (y - 11) + 'px';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1000);
+    }
+
+    /* ─── Blind Box ─── */
+    const MYSTERY_POOL = [
+      {
+        name: "彩虹奇迹", emoji: "🌈", desc: "七种烈酒的彩虹分层，颜值爆表，一口一个颜色",
+        recipe: "伏特加·蓝柑橘·石榴糖浆·橙汁·菠萝汁·冰块", method: "按密度从重到轻依次缓倒入杯，形成彩虹分层"
+      },
+      {
+        name: "深海之谜", emoji: "🌊", desc: "在嘴里炸开的深海泡泡",
+        recipe: "蓝柑橘酒·苏打水·跳跳糖·青柠汁", method: "蓝柑橘酒加冰摇匀，倒入苏打水，表面撒跳跳糖"
+      },
+      {
+        name: "樱花微醺", emoji: "🌸", desc: "粉粉的春日限定",
+        recipe: "清酒·玫瑰糖浆·柠檬汁·气泡水", method: "清酒+玫瑰糖浆摇匀过滤，加柠檬汁，注入气泡水"
+      },
+      {
+        name: "午夜街灯", emoji: "🌙", desc: "深夜最佳拍档",
+        recipe: "百利甜·浓缩咖啡·可可粉·冰块", method: "百利甜和浓缩咖啡加冰摇匀，滤入杯中，撒可可粉"
+      },
+      {
+        name: "西瓜冰沙", emoji: "🍉", desc: "夏日消暑神器",
+        recipe: "伏特加·鲜榨西瓜汁·碎冰·薄荷叶", method: "西瓜汁与伏特加加碎冰用搅拌机打成冰沙，薄荷装饰"
+      },
+      {
+        name: "火焰热情", emoji: "🔥", desc: "辣到飞起但很上头",
+        recipe: "龙舌兰·辣椒水·青柠汁·盐边", method: "杯口抹盐边，龙舌兰+辣椒水+青柠汁加冰摇匀"
+      },
+      {
+        name: "棉花糖之梦", emoji: "☁️", desc: "会变色的少女心",
+        recipe: "朗姆酒·棉花糖·蝶豆花水·柠檬汁", method: "蝶豆花水+朗姆酒调蓝色基底，加柠檬汁变紫，放棉花糖"
+      },
+      {
+        name: "时间停止", emoji: "⏰", desc: "让时间慢下来",
+        recipe: "芝华士·蜂蜜·柠檬汁·迷迭香", method: "芝华士+蜂蜜+柠檬汁加冰摇匀，迷迭香点火后盖杯口"
+      }
+    ];
+
+    const overlay = document.getElementById('blindbox');
+    const bbCard = document.getElementById('blindbox-card');
+    const bbTitle = document.getElementById('bb-title');
+    const bbEmoji = document.getElementById('bb-emoji');
+    const bbDesc = document.getElementById('bb-desc');
+    const bbClose = document.getElementById('bb-close');
+
+    function openBlindBox(e) {
+      overlay.classList.add('active');
+      bbCard.className = 'blindbox-card shaking';
+      bbTitle.textContent = '🎁 开盲盒中...';
+      bbEmoji.textContent = '🎁';
+      bbEmoji.style.transform = '';
+      bbDesc.innerHTML = '摇一摇，看看今天小蓝给你调了什么';
+      bbClose.style.display = 'none';
+
+      // After shaking, reveal
+      setTimeout(() => {
+        const pick = MYSTERY_POOL[Math.floor(Math.random() * MYSTERY_POOL.length)];
+        bbCard.className = 'blindbox-card revealing';
+        bbTitle.textContent = `✨ ${pick.name} ✨`;
+        bbEmoji.textContent = pick.emoji;
+        bbEmoji.style.transform = 'scale(1.2)';
+        bbDesc.innerHTML = `<div style="margin-bottom:8px">${pick.desc}</div><div style="font-size:12px;color:#b08970;text-align:left;margin-top:6px"><div style="margin-bottom:4px"><b style="color:#c4735a">🧪 原料：</b>${pick.recipe}</div><div><b style="color:#c4735a">📝 做法：</b>${pick.method}</div></div>`;
+        bbClose.style.display = 'inline-block';
+        spawnConfetti();
+      }, 1800);
+    }
+
+    function spawnConfetti() {
+      const colors = ['#d4634a', '#e8a040', '#88c040', '#6090d0', '#d8a8d0', '#f0d040'];
+      for (let i = 0; i < 20; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'confetti';
+        dot.style.background = colors[Math.floor(Math.random() * colors.length)];
+        dot.style.left = (30 + Math.random() * 220) + 'px';
+        dot.style.top = (20 + Math.random() * 60) + 'px';
+        dot.style.animationDelay = (Math.random() * 0.5) + 's';
+        dot.style.width = (4 + Math.random() * 6) + 'px';
+        dot.style.height = dot.style.width;
+        bbCard.appendChild(dot);
+        setTimeout(() => dot.remove(), 2000);
+      }
+    }
+
+    bbClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Re-trigger
+      bbCard.className = 'blindbox-card shaking';
+      bbTitle.textContent = '🎁 再来一次...';
+      bbEmoji.textContent = '🎁';
+      bbEmoji.style.transform = '';
+      bbDesc.innerHTML = '摇一摇~';
+      bbClose.style.display = 'none';
+      setTimeout(() => {
+        const pick = MYSTERY_POOL[Math.floor(Math.random() * MYSTERY_POOL.length)];
+        bbCard.className = 'blindbox-card revealing';
+        bbTitle.textContent = `✨ ${pick.name} ✨`;
+        bbEmoji.textContent = pick.emoji;
+        bbEmoji.style.transform = 'scale(1.2)';
+        bbDesc.innerHTML = `<div style="margin-bottom:8px">${pick.desc}</div><div style="font-size:12px;color:#b08970;text-align:left;margin-top:6px"><div style="margin-bottom:4px"><b style="color:#c4735a">🧪 原料：</b>${pick.recipe}</div><div><b style="color:#c4735a">📝 做法：</b>${pick.method}</div></div>`;
+        bbClose.style.display = 'inline-block';
+        spawnConfetti();
+      }, 1800);
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('active');
+    });
+  </script>
+</body>
+
+</html>
